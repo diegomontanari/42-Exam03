@@ -34,7 +34,7 @@ int match_char(FILE *f, char c)
     if (input == c)
         return 1;
     
-    ungetc(input, f); // Arrivo qui se non combacia, quindi torno al char prima
+    ungetc(input, f); // Arrivo qui se non combacia, quindi torno al char prima e ritorno non match (non errore grave da mettere -1, ma comunque errore)
     return 0;
 }
 
@@ -91,15 +91,17 @@ int scan_int(FILE *f, va_list ap)
         c = fgetc(f);
     }
 
-    // rimettiamo l’ultimo carattere non numerico nel buffer
-    if (c != EOF)
+    // Rimettiamo l’ultimo carattere non numerico nel buffer
+    if (c != EOF) // Così perché ungetc non accetta EOF in input.
         ungetc(c, f); // se "123A", il while di lettura cifre si ferma ad A, ma A non può essere consumato, devo tornare indietro per leggerlo, quindi lo rimetto nello stream
 
-    if (digits == 0)
+    if (digits == 0) // Se la conversione non è andata a buon fine (es: EOF subito nello stream)
         return 0;
 
-    int *ptr = va_arg(ap, int *);
-    *ptr = num * sign;
+    int *ptr = va_arg(ap, int *); // Perché uso puntatore? RICORDA: sncaf legge dallo stdin e lo salva nel codice, se lo salvassi in una variabile avresti uno ...
+    *ptr = num * sign; // ... Scope locale, e allora l'unico modo è salvare per riferimento, usando un puntatore. Il puntatore serve quindi per questo.
+                       // ma l'int * non solo a sinistra dell'uguale, serve anche a destra, perché scanf prende in input solo puntatori, quindi mettere int nelle parentesi, 
+                       // seppur corretto in termini di promozione dei tipi, è un ERRORE GRAVE perché leggeresti 4 byte (int) invece di 8 (int*)
     return 1;
 }
 
@@ -121,7 +123,7 @@ int scan_string(FILE *f, va_list ap)
     while (c != EOF && !isspace(c))
     {
         str[i++] = (char)c; // Stesso discorso. Se avessi voluto usare ptr come negli altri casi sarebbe bastato fare *str++ = (char)c; ma è la stessa cosa dato che una stringa è un array di char.
-        c = fgetc(f);
+        c = fgetc(f);       // Perché str[i++] è valido? Perché assumiamo che il chiamante abbia passato un buffer abbastanza grande (es buffer[1000]). Dato che dipende dal chiamante, scanf non è considerata sicura, 
     }
 
     // Rimette nel buffer il primo spazio o EOF
@@ -140,11 +142,36 @@ int scan_string(FILE *f, va_list ap)
 /*                        Gestione delle conversioni generiche                */
 /* -------------------------------------------------------------------------- */
 // Determina il tipo di conversione e chiama la funzione corrispondente.
+
+/*
+NOTA INTERESSANTE: Perché ci serve un doppio puntatore? 
+
+Pensaci:  se match_conv dovesse 
+avanzare format, non potrebbe se da vscanf avessi passato in input format.
+
+Passare un puntatore alla funzione passa solo la sua copia, se vuoi avanzarlo
+o retrocederlo (aritmetica dei puntatori) devi passare l'indirizzo del puntatore.
+In pratica, devi fare il passaggio PER RIFERIMENTO DEL PUNTATORE.
+Infatti in vscanf chiamo match_conv(f, &format, ap), l'indirizzo del
+puntatore format.
+
+Ora, questa è una scanf semplificata e non dobbiamo avanzare format 
+dentro match_conv, ma se avessimo dovuto gestire anche opzioni tipo 
+"%02d", "%ld", "%10s", ecc., allora sì, avrei dovuto avanzare 
+(*format) dentro match_conv facendo (*format)++; 
+
+Allora perché lascio **format ? Per portabilità: se in futuro voglio
+aggiungere quelle opzioni, non devo modificare i parametri in input.
+
+Chiaro!
+*/
+
 int match_conv(FILE *f, const char **format, va_list ap)
 {
     switch (**format)
     {
         case 'c':
+            // Non metto match_space perché ' ' è un char, se sta nell'input va letto come tale (lo spazio è un carattere valido e va letto così com'è)
             return scan_char(f, ap);
         case 'd':
             match_space(f);
@@ -171,22 +198,22 @@ int ft_vfscanf(FILE *f, const char *format, va_list ap)
     // Controllo EOF immediato
     if (c == EOF)
         return EOF;
-    ungetc(c, f);
+    ungetc(c, f); // Tutte queste righe servono solo a verificare che il file non sia vuoto
 
     // Ciclo principale: legge il formato
-    while (*format) // *format è il puntatore alla format string (es: "%d, %s: %c!  ")
+    while (*format) // format è il puntatore alla format string (es: "%d, %s: %c!  ")
     {
         if (*format == '%')
         {
             format++; // Passi al successivo char di format
-            if (match_conv(f, &format, ap) != 1)
+            if (match_conv(f, &format, ap) != 1) // Se errore di parsing, break
                 break;
             else
-                nconv++;
+                nconv++; // Fatta una conversione
         }
-        else if (isspace(*format))
+        else if (isspace(*format)) 
         {
-            if (match_space(f) == -1) // Salto tutti gli spazi e returna ultimo char non spazio letto
+            if (match_space(f) != 1) // Se non riesco a saltare tutti gli spazi e returnare ultimo char non spazio letto, break
                 break;
         }
         else if (match_char(f, *format) != 1) // Es: se la format string è "Age: %d", l'input dell'utente DEVE essere "Age: " match_char semplicemente verifica che l'user abbia scritto "Age : ". Poi, appena *format == '%' si va a scansionare il formato (qui: scan_int)
