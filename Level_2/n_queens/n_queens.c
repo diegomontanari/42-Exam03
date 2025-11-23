@@ -8,7 +8,7 @@ int	is_number(const char *s)
 	if (!s || !*s)
 		return (0);
 	for (int i = 0; s[i]; i++)
-		if (!isdigit((unsigned char)s[i]))
+		if (!isdigit((unsigned char)s[i])) // cast perché is_digit accetta solo valori positivi mentre char su alcuni sistemi può essere signed e questo può portare a undefined behavior.
 			return (0);
 	return (1);
 }

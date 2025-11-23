@@ -24,6 +24,17 @@ int match_space(FILE *f)
 /* -------------------------------------------------------------------------- */
 /*                         Match di caratteri letterali                       */
 /* -------------------------------------------------------------------------- */
+//Legge 1 carattere dall’input.
+
+// Se combacia → lo consuma (non servirà più). (Anche perché vscanf incrementa format
+// ad ogni iterazione quindi il FILE deve stare al passo e consumare un carattere)
+
+// Se NON combacia → deve “rimetterlo” nell’input perché non dovrebbe essere stato 
+// letto → e fallisce la conversione.
+// Se la conversione fallisce, ovviamente, scanf deve lasciare l’input intatto,
+// altrimenti rompe la logica del programma, e futuri scanf chiamati 
+// non funzionerebbero correttamente.
+
 int match_char(FILE *f, char c)
 {
     int input = fgetc(f);
@@ -60,7 +71,7 @@ int scan_char(FILE *f, va_list ap)
     
     char *ptr = va_arg(ap, char *); // “Dammi il prossimo elemento della lista di arg variadici, e interpretalo come un char *, salva il risultato in un char *ptr
     
-    *ptr = (char)c; // Ora il valore dell'utente viene assegnato al valore di ptr deferenziato, abbiamo "letto" l'n-esimo valore inserito dall'utente.
+    *ptr = (char)c; // Ora il valore dell'utente viene assegnato al valore di ptr deferenziato, abbiamo "letto" l'n-esimo valore inserito dall'utente. ATTENZIONE: la conversione (char) va fatta esplicita perché i cast impliciti sono non portabili e poco sicuri. Come regola generale: sai che in una riga passi da int a char? Esplicitalo sempre. 
     
     return 1;
 }
@@ -98,8 +109,16 @@ int scan_int(FILE *f, va_list ap)
     if (digits == 0) // Se la conversione non è andata a buon fine (es: EOF subito nello stream)
         return 0;
 
-    int *ptr = va_arg(ap, int *); // Perché uso puntatore? RICORDA: sncaf legge dallo stdin e lo salva nel codice, se lo salvassi in una variabile avresti uno ...
-    *ptr = num * sign; // ... Scope locale, e allora l'unico modo è salvare per riferimento, usando un puntatore. Il puntatore serve quindi per questo.
+    int *ptr = va_arg(ap, int *); // Perché uso puntatore? RICORDA: sncaf legge dallo stdin e lo salva nel codice, se lo salvassi in una variabile avresti una ...
+    *ptr = num * sign; // ... copia, ma poi non posso modificarla, e allora l'unico modo è per riferimento, usando un puntatore. Il puntatore serve quindi per questo.
+                       // --main----------|
+                       // int x;          |
+                       // scanf("%d", &x);|
+                       // ----------------|
+                       // hai questo, ora dentro scan_int, va_arg punta a &x. Chiaro? Quindi, int *ptr = va_arg(ap, int*) non fa altro che ...
+                       // ... collegare due freccette (puntatori) alla stessa variabile (x). Modificare *ptr (la variabile puntata da ptr) EQUIVALE A MODIFICARE X, ed ecco ...
+                       // ... che ora nel main (x è stato appena letto con scanf) puoi fare tutto (ad esempio printf("%d\n", x);) Chiaro!
+                       // ALTRA COSA IMPORTANTE:
                        // ma l'int * non solo a sinistra dell'uguale, serve anche a destra, perché scanf prende in input solo puntatori, quindi mettere int nelle parentesi, 
                        // seppur corretto in termini di promozione dei tipi, è un ERRORE GRAVE perché leggeresti 4 byte (int) invece di 8 (int*)
     return 1;
