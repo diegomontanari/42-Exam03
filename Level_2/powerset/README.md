@@ -1,50 +1,51 @@
 # Subject
 ```txt
-Display all subsets of a set whose sum of elements is equal to the first argument.
-The numbers of the set are given from the second argument to the last.
-A subset must not be displayed more than once.
+Assignment name : powerset
+Expected files : *.c *.h
+Allowed functions : atoi, printf, malloc, calloc, realloc, free.
+---------------------------------------------------------------
 
-Example 1:
-./a.out 5 2 3 | cat -e
-2 3$
+Write a program that will take as argument an integer n follow by a set of integers,
+your program should display all the subsets of whose sum of elements is n.
 
-Example 2:
-./a.out 12 5 7 4 3 2 | cat -e
-5 7$
+In case of a malloc error your program will exit with the code 1.
+We will not test invalid test(for example '1 1 2')
+hint: the empty set is a subset of anyset.
+
+
+For example this should work:
+$> ./powerset 3 1 0 2 4 5 3 | cat -e
+3$
+0 3$
+1 2$
+1 0 2$
+$> ./powerset 12 5 2 1 8 4 3 7 11 | cat -e
+8 4$
+1 11$
+1 4 7$
+2 3 7$
 5 4 3$
-7 3 2$
-
-They will **not** test invalid sequences, such as:
-
-./a.out 5 12 18 | cat -e
-
-The order of the output lines is not important, but the order of the input **must be preserved**.
-
-This is valid:
-
-./a.out 5 3 2 1 4 | cat -e 
-3 2$
-1 4$
-
-This is also valid:
-
-./a.out 5 3 2 1 4 | cat -e 
-1 4$
-3 2$
-
-This is **not valid**:
-
-./a.out 5 3 2 1 4 | cat -e 
-4 1$
-2 3$
-
-Pay attention to the case when the target number is 0, because "nothing" is considered a valid possibility, so you must print an empty line as a subset.
-
-Example:
-
-./a.out 0 1 -1 2 -2 | cat -e
+5 7$
+5 2 1 4$
+$> ./powerset 7 3 8 2| cat -e
 $
--1 1 2 -2$
--1 1$
-2 -2$
+$> ./powerset 0 1 -1| cat -e
+1 -1$
+
+The order of lines is not important, but the order of the element in a subset is.
+You must not have any duplicates (for example 2 1, 1 2)
+$> ./powerset 5 1 2 3 4 5| cat -e
+valid:
+1 4$
+2 3$
+5$
+
+or:
+2 3$
+5$
+1 4$
+not valid:
+4 1$
+3 2$
+5$ 
 ```
