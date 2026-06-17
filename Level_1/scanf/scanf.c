@@ -45,7 +45,7 @@ int match_char(FILE *f, char c)
     if (input == c)
         return 1;
     
-    ungetc(input, f); // Arrivo qui se non combacia, quindi torno al char prima e ritorno non match (non errore grave da mettere -1, ma comunque errore)
+    ungetc(input, f); // Arrivo qui se non combacia, quindi torno al char prima e ritorno non match (non errore grave da mettere -1, ma comunque segnalo che non combacia)
     return 0;
 }
 
