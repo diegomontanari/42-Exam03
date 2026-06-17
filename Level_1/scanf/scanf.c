@@ -65,6 +65,8 @@ int match_char(FILE *f, char c)
 int scan_char(FILE *f, va_list ap)
 {
     int c = fgetc(f); // legge un carattere dal file
+                      // Attenzione: fgetc restituisce int perché deve poter restituire sia un carattere valido (0–255) sia EOF che di solito vale -1. 
+                      // Se restituisse char, non ci sarebbe modo di distinguere EOF da un carattere legittimo con valore 255.
     
     if (c == EOF)
         return -1;
