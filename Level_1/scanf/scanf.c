@@ -295,3 +295,15 @@ scan_string()	Legge una sequenza di caratteri non spazi, termina con \0.        
 ft_scanf()	    Scansiona l’intero formato, gestendo %, spazi e caratteri letterali. Restituisce il numero di conversioni riuscite o EOF. |
 ------------------------------------------------------------------------------------------------------------------------------------------|
 */
+
+/*
+Le funzioni match hanno un compito di verifica: devono confermare che l'input corrisponde a qualcosa di preciso. Se arriva EOF prima di poter verificare, la risposta è "non posso sapere, l'input è finito troppo presto" e questo è un fallimento netto, quindi -1. (Per questo nelle match controlli se l'input == EOF).
+
+Le funzioni scan hanno un compito di raccolta: devono leggere più dati possibile. scan_string ha letto dei caratteri validi, li ha salvati, li ha terminati con \0. EOF non ha interrotto niente di sbagliato, ha solo segnalato che non c'è altro da leggere. Il risultato è comunque una stringa valida, quindi ritorna 1. (Qui arrivare a elem == EOF non è un fallimento, perché almeno che digits == 0 la conversione l'hai fatta).
+
+In pratica:
+
+match_char('A') con EOF in input: non sa se il prossimo char era 'A' o no, non può rispondere, fallimento.
+scan_string che legge "hello" e poi trova EOF: ha una stringa valida, non è un fallimento.
+Il caso di fallimento di scan_string è diverso: ritorna 0 solo se non ha letto nemmeno un carattere, cioè EOF è arrivato prima di qualsiasi dato utile. Lì sì, la conversione è fallita.
+*/
