@@ -1,3 +1,15 @@
+/*
+
+Gli argomenti variadici sono gli argomenti "extra" che puoi passare a una funzione in numero variabile. In ft_scanf sono tutto quello che viene dopo la format string:
+
+ft_scanf("Age: %d Name: %s", &age, name);
+//                             ^^^^  ^^^^
+//                         argomenti variadici
+va_list ap è una struttura che tiene traccia di dove sei arrivato a leggere in questa lista. Ogni volta che chiami va_arg(ap, int*) stai dicendo "dammi il prossimo argomento e interpretalo come int*", e ap avanza internamente al prossimo.
+
+Ecco perché se la passi per copia il problema è grave: immagina di avere &age e name in lista. La prima conversione %d chiama va_arg e prende &age. Se ap è una copia, l'originale non sa che &age è già stato consumato. La seconda conversione %s chiamerebbe va_arg sull'originale e prenderebbe di nuovo &age invece di name.
+*/
+
 #include <stdarg.h> // Variadic args
 #include <stdio.h> // fgets, scanf, printf, perror ecc...
 #include <ctype.h> // Char type, serve per ft che classificano i char (es isalpha, isdigit ecc...)
