@@ -62,7 +62,7 @@ int match_char(FILE *f, char c)
 // ES: se l'user scrive 'a', fgets estrae a, char *ptr = va_arg(ap, char *) dice che come &c punta a c anche ptr punta a c.
 // ptr deferenziato, quindi il suo valore, diventa c, ovvero la 'a' dell'utente. Ho finito di salvare il valore dell'utente.
 
-int scan_char(FILE *f, va_list ap)
+int scan_char(FILE *f, va_list *ap)
 {
     int c = fgetc(f); // legge un carattere dal file
                       // Attenzione: fgetc restituisce int perché deve poter restituire sia un carattere valido (0–255) sia EOF che di solito vale -1. 
@@ -71,7 +71,7 @@ int scan_char(FILE *f, va_list ap)
     if (c == EOF)
         return -1;
     
-    char *ptr = va_arg(ap, char *); // “Dammi il prossimo elemento della lista di arg variadici, e interpretalo come un char *, salva il risultato in un char *ptr
+    char *ptr = va_arg(*ap, char *); // “Dammi il prossimo elemento della lista di arg variadici, e interpretalo come un char *, salva il risultato in un char *ptr
     
     *ptr = (char)c; // Ora il valore dell'utente viene assegnato al valore di ptr deferenziato, abbiamo "letto" l'n-esimo valore inserito dall'utente. ATTENZIONE: la conversione (char) va fatta esplicita perché i cast impliciti sono non portabili e poco sicuri. Come regola generale: sai che in una riga passi da int a char? Esplicitalo sempre. 
     
@@ -81,7 +81,7 @@ int scan_char(FILE *f, va_list ap)
 /* -------------------------------------------------------------------------- */
 /*                              Conversione %d                                */
 /* -------------------------------------------------------------------------- */
-int scan_int(FILE *f, va_list ap)
+int scan_int(FILE *f, va_list *ap)
 {
     int sign = 1;
     int num = 0;
@@ -111,7 +111,7 @@ int scan_int(FILE *f, va_list ap)
     if (digits == 0) // Se la conversione non è andata a buon fine (es: EOF subito nello stream)
         return 0;
 
-    int *ptr = va_arg(ap, int *); // Perché uso puntatore? RICORDA: sncaf legge dallo stdin e lo salva nel codice, se lo salvassi in una variabile avresti una ...
+    int *ptr = va_arg(*ap, int *); // Perché uso puntatore? RICORDA: sncaf legge dallo stdin e lo salva nel codice, se lo salvassi in una variabile avresti una ...
     *ptr = num * sign; // ... copia, ma poi non posso modificarla, e allora l'unico modo è per riferimento, usando un puntatore. Il puntatore serve quindi per questo.
                        // --main----------|
                        // int x;          |
@@ -130,9 +130,9 @@ int scan_int(FILE *f, va_list ap)
 /*                              Conversione %s                                */
 /* -------------------------------------------------------------------------- */
 // Legge una stringa (senza spazi) e la scrive nel buffer passato.
-int scan_string(FILE *f, va_list ap)
+int scan_string(FILE *f, va_list *ap)
 {
-    char *str = va_arg(ap, char *);
+    char *str = va_arg(*ap, char *);
     int c = fgetc(f);
     int i = 0;
 
@@ -187,7 +187,7 @@ aggiungere quelle opzioni, non devo modificare i parametri in input.
 Chiaro!
 */
 
-int match_conv(FILE *f, const char **format, va_list ap)
+int match_conv(FILE *f, const char **format, va_list *ap)
 {
     switch (**format)
     {
@@ -227,7 +227,7 @@ int ft_vfscanf(FILE *f, const char *format, va_list ap)
         if (*format == '%')
         {
             format++; // Passi al successivo char di format
-            if (match_conv(f, &format, ap) != 1) // Se errore di parsing, break
+            if (match_conv(f, &format, &ap) != 1) // Se errore di parsing, break
                 break;
             else
                 nconv++; // Fatta una conversione
