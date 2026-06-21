@@ -1,7 +1,6 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <ctype.h>
 
 // Questa controlla sia che n sia un numero ma anche che atoi non crei problemi
 // Infatti atoi non gestisce l'overflow: se gli passi "99999999999", legge i caratteri e fa i conti in int, 
@@ -15,7 +14,7 @@ int is_number(const char *s)
 	int i = 0;
 	for (; s[i]; i++)
 	{
-		if (!isdigit((unsigned char)s[i])) // cast perché isdigit accetta solo valori positivi mentre char su alcuni sistemi può essere signed e questo può portare a undefined behavior
+		if (!(s[i] >= '0' && s[i] <= '9')) // if (!isdigit((unsigned char)s[i])) era prima con cast perché isdigit accetta solo valori positivi mentre char su alcuni sistemi può essere signed e questo può portare a undefined behavior, ma qui non posso usare is_digit poiché non ammessa dalla 42, quindi uso le vecchie maniere
 			return 0;
 	}
 	if (i > 10) return 0;
