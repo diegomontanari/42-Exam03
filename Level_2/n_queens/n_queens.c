@@ -3,14 +3,33 @@
 #include <stdio.h>
 #include <ctype.h>
 
-int	is_number(const char *s)
+// Questa controlla sia che n sia un numero ma anche che atoi non crei problemi
+// Infatti atoi non gestisce l'overflow: se gli passi "99999999999", legge i caratteri e fa i conti in int, 
+// ma quando il risultato supera INT_MAX il comportamento è undefined — può restituire un numero negativo, zero, 
+// qualsiasi cosa. Quindi is_number verifica che la stringa rappresenti un numero che atoi può convertire correttamente 
+// senza andare in undefined behavior.
+int is_number(const char *s)
 {
 	if (!s || !*s)
 		return (0);
-	for (int i = 0; s[i]; i++)
-		if (!isdigit((unsigned char)s[i])) // cast perché is_digit accetta solo valori positivi mentre char su alcuni sistemi può essere signed e questo può portare a undefined behavior.
-			return (0);
-	return (1);
+	int i = 0;
+	for (; s[i]; i++)
+	{
+		if (!isdigit((unsigned char)s[i])) // cast perché isdigit accetta solo valori positivi mentre char su alcuni sistemi può essere signed e questo può portare a undefined behavior
+			return 0;
+	}
+	if (i > 10) return 0;
+	if (i == 10)
+	{
+		const char *max = "2147483647";
+		for (int j = 0; j < 10; j++)
+		{
+			if (s[j] > max[j]) return 0; // se anche una cifra da sx è maggiore allora n è maggiore allora ritorno 0
+			if (s[j] < max[j]) break; // allora minore posso uscire e ritorna 1 alla fine del ciclo
+			// if s[j] == max[j] continua il ciclo. Nel caso peggiore sono identici allora esce dal ciclo e ritorna 1
+		}
+	}
+	return 1;
 }
 
 int	is_safe(int *pos, int col, int row)
