@@ -24,11 +24,8 @@ void print_subset(int *subset, int size)
 void backtrack(int *set, int set_size, int *subset, int sub_size,
                int index, int sum, int target)
 {
-    if (sum == target)
-    {
+    if (sum == target && sub_size > 0)
         print_subset(subset, sub_size);
-        // non interrompiamo perché vogliamo tutte le combinazioni
-    }
 
     // Esplora tutti gli elementi da index in poi
     for (int i = index; i < set_size; i++)
@@ -46,13 +43,11 @@ int main(int ac, char **av)
     int target = atoi(av[1]);
     int set_size = ac - 2;
 
-    if (set_size < 0)
-        return 1;
+    if (set_size == 0)
+        return 0;
 
     int *set = malloc(set_size * sizeof(int));
-    // Subset per provare le combinazioni (contenitore temporaneo)
     int *subset = malloc(set_size * sizeof(int));
-    // Controllo se allocazione ha avuto successo
     if (!set || !subset)
     {
         free(set);
