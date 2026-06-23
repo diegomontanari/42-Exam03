@@ -1,44 +1,64 @@
-#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+// Approccio diverso rispetto a permutations_no_lex.c:
+// invece di swappare in-place (che rompe l'ordine), si ordina prima la stringa
+// e si costruisce la permutazione carattere per carattere usando un array visited.
+// Scegliendo sempre il prossimo carattere disponibile in ordine, l'output è lessicografico.
 
-// start = posizione che sto decidendo
-// i = candidato che voglio provare in quella posizione
-void permutations(char *s, int start, int len)
+void permutations(char *s, int len, char *buf, int *visited, int depth)
 {
-	if (start == len) {
-		printf("%s\n", s); // caso base, se ho finito la stringa
+	if (depth == len)
+	{
+		buf[len] = '\0';
+		printf("%s\n", buf);
 		return ;
 	}
-
-	// qui parto con i = start perché Sì, i = start perché tutto ciò che viene prima di start è già stato deciso
-	// infatti: mmagina di essere qui: start = 1; Cosa significa? Significa: b | a c
-	// La parte sinistra: b è già fissata. Non devi più toccarla.
-	for (int i = start; i < len; i++) { // scorre sulla stringa
-		char tmp = s[start]; // salvo start che sta per essere sovrascritto
-		s[start]= s[i]; // assegno s[i] a start
-		s[i] = tmp; // assegno tmp (il vecchio start) a s[i])
-
-		permutations(s, start + 1, len);
-
-		// in matematica si direbbe: swap è un'involuzione
-		// lo swap è una di quelle operazioni speciali che sono il proprio inverso.
-		// per questo riscrivo identico (unica diff. è che tmp stavolta già dichiarato)
-		tmp = s[start];
-		s[start] = s[i];
-		s[i] = tmp;
+	for (int i = 0; i < len; i++)
+	{
+		if (visited[i])
+			continue ;
+		visited[i] = 1;
+		buf[depth] = s[i];
+		permutations(s, len, buf, visited, depth + 1);
+		visited[i] = 0;
 	}
 }
 
 int main(int ac, char **av)
 {
-	if (ac != 2) return 1;
+	if (ac != 2)
+		return 1;
 
-	int start = 0;
-	int len;
-	for (len = 0; av[1][len]; len++)
-		;
-	permutations(av[1], start, len);
+	int len = 0;
+	while (av[1][len])
+		len++;
+
+	// ordino la stringa (bubble sort) per garantire output lessicografico
+	char *s = av[1];
+	for (int i = 0; i < len - 1; i++)
+		for (int j = 0; j < len - 1 - i; j++)
+			if (s[j] > s[j + 1])
+			{
+				char tmp = s[j];
+				s[j] = s[j + 1];
+				s[j + 1] = tmp;
+			}
+
+	char *buf = malloc(len + 1);
+	int *visited = malloc(len * sizeof(int));
+	if (!buf || !visited)
+	{
+		free(buf);
+		free(visited);
+		return 1;
+	}
+	for (int i = 0; i < len; i++)
+		visited[i] = 0;
+
+	permutations(s, len, buf, visited, 0);
+
+	free(buf);
+	free(visited);
 	return 0;
 }
