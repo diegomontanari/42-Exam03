@@ -69,9 +69,13 @@ void	solve(int *pos, int col, int n)
 
 int	main(int ac, char **av)
 {
+	// prima is_number si assicura che la stringa av
+	// sia numerica e non sia overflow...
 	if (ac != 2 || !is_number(av[1]))
 		return (1);
 
+	// ... Solo dopo possiamo chiamare atoi con 
+	// sicurezza
 	int n = atoi(av[1]);
 	if (n <= 0)
 		return (1);
