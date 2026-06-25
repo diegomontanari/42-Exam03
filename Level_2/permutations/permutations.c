@@ -45,7 +45,7 @@ int main(int ac, char **av)
 				s[j + 1] = tmp;
 			}
 
-	char *buf = malloc(len + 1);
+	char *buf = malloc(len + 1); // aggiungo spazio per terminatore stringa
 	int *visited = malloc(len * sizeof(int));
 	if (!buf || !visited)
 	{
