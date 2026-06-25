@@ -46,7 +46,8 @@ int main(int ac, char **av)
 			}
 
 	char *buf = malloc(len + 1); // aggiungo spazio per terminatore stringa
-	int *visited = malloc(len * sizeof(int));
+	// buf non serve inizializzarlo: lo riempiamo carattere per carattere nella ricorsione prima di leggerlo
+	int *visited = malloc(len * sizeof(int)); // avremmo potuto usare calloc(len, sizeof(int)) per azzerare senza il for sotto
 	if (!buf || !visited)
 	{
 		free(buf);
@@ -54,7 +55,7 @@ int main(int ac, char **av)
 		return 1;
 	}
 	for (int i = 0; i < len; i++)
-		visited[i] = 0;
+		visited[i] = 0; // visited invece va azzerato: lo leggiamo subito nella ricorsione per sapere se un indice è già usato
 
 	permutations(s, len, buf, visited, 0);
 
