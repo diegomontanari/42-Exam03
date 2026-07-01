@@ -64,9 +64,10 @@ int	main(int ac, char **av)
 	if (!buf)
 		return fail(NULL, NULL);
 
-	// int = signed int → tipo intero con segno
-	// size_t = intero senza segno, usato come standard per misure/dimensioni
-	// ssize_t = intero con segno, per quantità che possono essere -1 (negative)
+	// int        → intero con segno; usato per valori “logici”: stati, errori, contatori generici.
+	// size_t     → intero senza segno; rappresenta una dimensione (lunghezza, quantità) che non può essere negativa.
+	// ssize_t    → come size_t, ma con segno; usato per quantità che possono valere -1 per segnalare un errore
+	//              (es. byte letti/scritti da read(), write()).
 	ssize_t r;
     size_t total = 0; // totale di byte letti
     
