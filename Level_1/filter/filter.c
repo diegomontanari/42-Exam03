@@ -100,9 +100,9 @@ int	main(int ac, char **av)
         total += (size_t)r; // Aumento il contatore dei byte totali letti
         acc[total] = '\0'; // metto '\0' perché sto lavorando con una stringa. '\0' in questo caso è solo un terminatore temporaneo, perché dopo lo sovrascriverò con gli altri byte. Potrei tranquillamente metterlo solo fuori dal ciclo, perché tanto mi serve solo per l'ultima stampa, così il printf si ferma quando lo incontra, ma metterlo dentro è più standard.
     }
-    if (r < 0) // se read ha dato errore (restituito -1) 
-        return fail(acc, buf);
-	
+	if (r < 0) // se read ha dato errore (restituito -1)
+		return fail(acc, buf);
+
 	free(buf);
 
     // Scansione + sostituzione in streaming su stdout (via printf)
